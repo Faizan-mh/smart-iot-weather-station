@@ -15,8 +15,11 @@ public class SensorReading {
     @Column(name = "device_id", nullable = false)
     private String deviceId;
 
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "deviceTimestamp", nullable = false)
+    private LocalDateTime deviceTimestamp;
+
+    @Column(name = "serverTimestamp", nullable = false)
+    private LocalDateTime serverTimestamp;
 
     @Column(name = "message_id")
     private String messageId;
@@ -75,12 +78,20 @@ public class SensorReading {
         this.deviceId = deviceId;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getDeviceTimestamp() {
+        return deviceTimestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDeviceTimestamp(LocalDateTime deviceTimestamp) {
+        this.deviceTimestamp = deviceTimestamp;
+    }
+
+    public LocalDateTime getServerTimestamp() {
+        return serverTimestamp;
+    }
+
+    public void setServerTimestamp(LocalDateTime serverTimestamp) {
+        this.serverTimestamp = serverTimestamp;
     }
 
     public String getMessageId() {

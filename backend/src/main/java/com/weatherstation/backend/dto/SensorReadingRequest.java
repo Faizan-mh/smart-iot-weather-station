@@ -7,7 +7,7 @@ public class SensorReadingRequest {
     private String messageId;
     private LocalDateTime deviceTimestamp;
 
-    private Boolean rainSensor;
+    private Double rainSensor;
 
     private Double p1Peak;
     private Double p2Peak;
@@ -51,11 +51,11 @@ public class SensorReadingRequest {
         this.deviceTimestamp = deviceTimestamp;
     }
 
-    public Boolean getRainSensor() {
+    public Double getRainSensor() {
         return rainSensor;
     }
 
-    public void setRainSensor(Boolean rainSensor) {
+    public void setRainSensor(Double rainSensor) {
         this.rainSensor = rainSensor;
     }
 

@@ -13,8 +13,15 @@ public class GlobalException {
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ExceptionResponse> duplicateResourceException(DuplicateResourceException e, HttpServletRequest request){
         ExceptionResponse response = new ExceptionResponse(
-                400,"Duplicate", e.getMessage(), request.getRequestURI());
+                HttpStatus.CONFLICT.value(),"Duplicate", e.getMessage(), request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> resourceNotFoundException(ResourceNotFoundException e, HttpServletRequest request){
+        ExceptionResponse response = new ExceptionResponse(
+                HttpStatus.NOT_FOUND.value(), "Not Found", e.getMessage(), request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }

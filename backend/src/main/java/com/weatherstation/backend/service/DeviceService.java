@@ -23,12 +23,12 @@ public class DeviceService {
 
     public DeviceResponse createDevice(DeviceRequest deviceRequest){
         Device device = deviceMapper.toEntity(deviceRequest);
-        device.setCreatedAt(LocalDateTime.now());
-        device.setActive(true);
 
         if(deviceExists(device)){
             throw new DuplicateResourceException("Device Already Exists");
         }
+        device.setCreatedAt(LocalDateTime.now());
+        device.setActive(true);
         DeviceResponse DeviceResp = deviceMapper.toDto(deviceRepository.save(device));
         return DeviceResp;
 
