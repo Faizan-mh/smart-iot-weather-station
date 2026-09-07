@@ -3,6 +3,7 @@ package com.weatherstation.backend.controller;
 import com.weatherstation.backend.dto.DeviceRequest;
 import com.weatherstation.backend.dto.DeviceResponse;
 import com.weatherstation.backend.service.DeviceService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,7 @@ public class DeviceController {
     }
 
     @PostMapping
-    public ResponseEntity<DeviceResponse> createDevice(@RequestBody DeviceRequest request){
+    public ResponseEntity<DeviceResponse> createDevice(@Valid @RequestBody DeviceRequest request){
         DeviceResponse response = deviceService.createDevice(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

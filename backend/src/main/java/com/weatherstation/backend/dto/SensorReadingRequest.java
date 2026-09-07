@@ -1,27 +1,44 @@
 package com.weatherstation.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public class SensorReadingRequest {
+    @NotBlank
     private String deviceId;
+    @NotBlank
     private String messageId;
+    @NotBlank
     private LocalDateTime deviceTimestamp;
-
+    @NotBlank
     private Double rainSensor;
-
+    @NotBlank
     private Double p1Peak;
+    @NotBlank
     private Double p2Peak;
+    @NotBlank
     private Double p3Peak;
+    @NotBlank
     private Double p4Peak;
 
+    @NotBlank
     private Double p1Rms;
+    @NotBlank
     private Double p2Rms;
+    @NotBlank
     private Double p3Rms;
+    @NotBlank
     private Double p4Rms;
 
+    @NotBlank
     private Integer p1ImpactCount;
+    @NotBlank
     private Integer p2ImpactCount;
+    @NotBlank
     private Integer p3ImpactCount;
+    @NotBlank
     private Integer p4ImpactCount;
 
     public SensorReadingRequest() {
