@@ -1,0 +1,12 @@
+package com.weatherstation.backend.processing;
+
+public enum EventReason {
+
+    NO_EVIDENCE,
+    PERSISTENT_MULTI_ZONE_ACTIVITY,
+    LOCALIZED_PIEZO_ACTIVITY,
+    RAIN_SENSOR_WET,
+    PIEZO_RAIN_SENSOR_AGREEMENT,
+    PIEZO_RAIN_SENSOR_CONFLICT,
+    HIGH_WIND_CONTEXT
+}

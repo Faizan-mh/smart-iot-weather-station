@@ -32,6 +32,9 @@ public class SensorReadingMapper {
         sensorReading.setP3ImpactCount(request.getP3ImpactCount());
         sensorReading.setP4ImpactCount(request.getP4ImpactCount());
 
+        sensorReading.setSamplingRateHz(request.getSamplingRateHz());
+        sensorReading.setWindowDurationMs(request.getWindowDurationMs());
+
         return sensorReading;
     }
 

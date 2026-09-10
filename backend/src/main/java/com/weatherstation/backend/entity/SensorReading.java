@@ -63,6 +63,11 @@ public class SensorReading {
     @Column(name = "p4_impact_count")
     private Integer p4ImpactCount;
 
+    @Column(name= "sampling_rate_hz")
+    private double samplingRateHz;
+    @Column(name = "window_duration_ms")
+    private double windowDurationMs;
+
     public SensorReading() {
     }
 
@@ -204,5 +209,21 @@ public class SensorReading {
 
     public void setP4ImpactCount(Integer p4ImpactCount) {
         this.p4ImpactCount = p4ImpactCount;
+    }
+
+    public double getSamplingRateHz() {
+        return samplingRateHz;
+    }
+
+    public void setSamplingRateHz(double samplingRateHz) {
+        this.samplingRateHz = samplingRateHz;
+    }
+
+    public double getWindowDurationMs() {
+        return windowDurationMs;
+    }
+
+    public void setWindowDurationMs(double windowDurationMs) {
+        this.windowDurationMs = windowDurationMs;
     }
 }

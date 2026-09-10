@@ -27,7 +27,7 @@ public class PiezoAnalyzer {
 
     public boolean[] analyzeZones(
             SensorReading reading,
-            PiezoConfiguration configuration
+            Configuration configuration
     ){
         boolean p1Active = isZoneActive(
                 reading.getP1Peak(),

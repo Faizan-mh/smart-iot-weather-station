@@ -40,7 +40,7 @@ public class PiezoAnalyzerTest {
     void shouldAnalyzeAllFourZones() {
 
         PiezoAnalyzer analyzer = new PiezoAnalyzer();
-        PiezoConfiguration configuration = new PiezoConfiguration();
+        Configuration configuration = new Configuration();
 
         configuration.setP1PeakThreshold(10);
         configuration.setP1RmsThreshold(5);

@@ -13,16 +13,20 @@ public class EnvironmentalReading {
     private Long id;
 
     @Column(name = "device_id", nullable = false)
-    private String device_id;
+    private String deviceId;
 
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "device_timestamp", nullable = false)
+    private LocalDateTime deviceTimestamp;
 
     @Column(name = "temperature_c")
     private Double temperatureC;
 
     @Column(name = "humidity_percent")
     private Double humidityPercent;
+
+    private double pressureHpa;
+    private double windSpeedKmh;
+    private double windGustKmh;
 
     public EnvironmentalReading() {
     }
@@ -32,20 +36,20 @@ public class EnvironmentalReading {
     }
 
 
-    public String getDevice_id() {
-        return device_id;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public void setDevice_id(String device_id) {
-        this.device_id = device_id;
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getDeviceTimestamp() {
+        return deviceTimestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDeviceTimestamp(LocalDateTime deviceTimestamp) {
+        this.deviceTimestamp = deviceTimestamp;
     }
 
     public Double getTemperatureC() {
@@ -62,5 +66,29 @@ public class EnvironmentalReading {
 
     public void setHumidityPercent(Double humidityPercent) {
         this.humidityPercent = humidityPercent;
+    }
+
+    public double getPressureHpa() {
+        return pressureHpa;
+    }
+
+    public void setPressureHpa(double pressureHpa) {
+        this.pressureHpa = pressureHpa;
+    }
+
+    public double getWindSpeedKmh() {
+        return windSpeedKmh;
+    }
+
+    public void setWindSpeedKmh(double windSpeedKmh) {
+        this.windSpeedKmh = windSpeedKmh;
+    }
+
+    public double getWindGustKmh() {
+        return windGustKmh;
+    }
+
+    public void setWindGustKmh(double windGustKmh) {
+        this.windGustKmh = windGustKmh;
     }
 }

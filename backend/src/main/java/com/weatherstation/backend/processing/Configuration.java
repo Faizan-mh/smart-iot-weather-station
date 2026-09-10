@@ -1,6 +1,6 @@
 package com.weatherstation.backend.processing;
 
-public class PiezoConfiguration {
+public class Configuration {
     private double p1PeakThreshold;
     private double p2PeakThreshold;
     private double p3PeakThreshold;
@@ -16,7 +16,14 @@ public class PiezoConfiguration {
     private int p3ImpactThreshold;
     private int p4ImpactThreshold;
 
-    public PiezoConfiguration() {
+    private int minimumActiveZones;
+    private int requiredConsecutiveWindows;
+    private double rainSensorWetThreshold;
+
+    private double highWindThresholdKmh;
+
+
+    public Configuration() {
     }
 
     public double getP1PeakThreshold() {
@@ -113,5 +120,37 @@ public class PiezoConfiguration {
 
     public void setP4ImpactThreshold(int p4ImpactThreshold) {
         this.p4ImpactThreshold = p4ImpactThreshold;
+    }
+
+    public int getMinimumActiveZones() {
+        return minimumActiveZones;
+    }
+
+    public void setMinimumActiveZones(int minimumActiveZones) {
+        this.minimumActiveZones = minimumActiveZones;
+    }
+
+    public int getRequiredConsecutiveWindows() {
+        return requiredConsecutiveWindows;
+    }
+
+    public void setRequiredConsecutiveWindows(int requiredConsecutiveWindows) {
+        this.requiredConsecutiveWindows = requiredConsecutiveWindows;
+    }
+
+    public double getRainSensorWetThreshold() {
+        return rainSensorWetThreshold;
+    }
+
+    public void setRainSensorWetThreshold(double rainSensorWetThreshold) {
+        this.rainSensorWetThreshold = rainSensorWetThreshold;
+    }
+
+    public double getHighWindThresholdKmh() {
+        return highWindThresholdKmh;
+    }
+
+    public void setHighWindThresholdKmh(double highWindThresholdKmh) {
+        this.highWindThresholdKmh = highWindThresholdKmh;
     }
 }

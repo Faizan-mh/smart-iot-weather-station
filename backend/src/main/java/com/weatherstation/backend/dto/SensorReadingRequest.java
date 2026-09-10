@@ -41,6 +41,11 @@ public class SensorReadingRequest {
     @NotBlank
     private Integer p4ImpactCount;
 
+    @NotBlank
+    private double samplingRateHz;
+    @NotBlank
+    private double windowDurationMs;
+
     public SensorReadingRequest() {
     }
 
@@ -170,5 +175,21 @@ public class SensorReadingRequest {
 
     public void setP4ImpactCount(Integer p4ImpactCount) {
         this.p4ImpactCount = p4ImpactCount;
+    }
+
+    public double getSamplingRateHz() {
+        return samplingRateHz;
+    }
+
+    public void setSamplingRateHz(double samplingRateHz) {
+        this.samplingRateHz = samplingRateHz;
+    }
+
+    public double getWindowDurationMs() {
+        return windowDurationMs;
+    }
+
+    public void setWindowDurationMs(double windowDurationMs) {
+        this.windowDurationMs = windowDurationMs;
     }
 }
