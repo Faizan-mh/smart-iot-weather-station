@@ -40,11 +40,11 @@ public class EventAssessment {
         this.persistentPiezoActivity = persistentPiezoActivity;
     }
 
-    public boolean isRainSensorWet() {
+    public Boolean isRainSensorWet() {
         return rainSensorWet;
     }
 
-    public void setRainSensorWet(boolean rainSensorWet) {
+    public void setRainSensorWet(Boolean rainSensorWet) {
         this.rainSensorWet = rainSensorWet;
     }
 

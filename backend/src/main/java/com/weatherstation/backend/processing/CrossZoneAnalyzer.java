@@ -1,5 +1,8 @@
 package com.weatherstation.backend.processing;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class CrossZoneAnalyzer {
     public int countActiveZones(boolean[] activeZones){
         int activeCount = 0;

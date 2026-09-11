@@ -1,5 +1,8 @@
 package com.weatherstation.backend.processing;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class TemporalAnalyzer {
     private int consecutiveActiveWindows = 0;
     public boolean update(

@@ -22,6 +22,13 @@ public class Configuration {
 
     private double highWindThresholdKmh;
 
+    private long endConfirmationSeconds;
+
+    private double impactFrequencyReference;
+    private double rmsReference;
+
+    private double moderateIntensityThreshold;
+    private double heavyIntensityThreshold;
 
     public Configuration() {
     }
@@ -152,5 +159,45 @@ public class Configuration {
 
     public void setHighWindThresholdKmh(double highWindThresholdKmh) {
         this.highWindThresholdKmh = highWindThresholdKmh;
+    }
+
+    public long getEndConfirmationSeconds() {
+        return endConfirmationSeconds;
+    }
+
+    public void setEndConfirmationSeconds(long endConfirmationSeconds) {
+        this.endConfirmationSeconds = endConfirmationSeconds;
+    }
+
+    public double getImpactFrequencyReference() {
+        return impactFrequencyReference;
+    }
+
+    public void setImpactFrequencyReference(double impactFrequencyReference) {
+        this.impactFrequencyReference = impactFrequencyReference;
+    }
+
+    public double getRmsReference() {
+        return rmsReference;
+    }
+
+    public void setRmsReference(double rmsReference) {
+        this.rmsReference = rmsReference;
+    }
+
+    public double getModerateIntensityThreshold() {
+        return moderateIntensityThreshold;
+    }
+
+    public void setModerateIntensityThreshold(double moderateIntensityThreshold) {
+        this.moderateIntensityThreshold = moderateIntensityThreshold;
+    }
+
+    public double getHeavyIntensityThreshold() {
+        return heavyIntensityThreshold;
+    }
+
+    public void setHeavyIntensityThreshold(double heavyIntensityThreshold) {
+        this.heavyIntensityThreshold = heavyIntensityThreshold;
     }
 }

@@ -24,8 +24,11 @@ public class EnvironmentalReading {
     @Column(name = "humidity_percent")
     private Double humidityPercent;
 
+    @Column(name = "pressure_hpa")
     private double pressureHpa;
+    @Column(name = "wind_speed_kmh")
     private double windSpeedKmh;
+    @Column(name = "wind_gust_kmh")
     private double windGustKmh;
 
     public EnvironmentalReading() {

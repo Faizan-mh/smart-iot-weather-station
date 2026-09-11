@@ -1,5 +1,7 @@
 package com.weatherstation.backend.entity;
 
+import com.weatherstation.backend.enums.RainEventStatus;
+import com.weatherstation.backend.enums.RainIntensity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -21,22 +23,28 @@ public class RainEvent {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "duration")
-    private Long duration;
+    @Column(name = "durationSeconds")
+    private Long durationSeconds;
 
     @Column(name = "intensity")
-    private Double intensity;
+    @Enumerated(EnumType.STRING)
+    private RainIntensity intensity;
 
     @Column(name = "confidence")
     private Double confidence;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private RainEventStatus status;
 
     @Column(name = "processing_version")
-    private Integer processingVersion;
+    private String processingVersion;
 
     public RainEvent() {
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
@@ -67,19 +75,19 @@ public class RainEvent {
         this.endTime = endTime;
     }
 
-    public Long getDuration() {
-        return duration;
+    public Long getDurationSeconds() {
+        return durationSeconds;
     }
 
-    public void setDuration(Long duration) {
-        this.duration = duration;
+    public void setDurationSeconds(Long durationSeconds) {
+        this.durationSeconds = durationSeconds;
     }
 
-    public Double getIntensity() {
+    public RainIntensity getIntensity() {
         return intensity;
     }
 
-    public void setIntensity(Double intensity) {
+    public void setIntensity(RainIntensity intensity) {
         this.intensity = intensity;
     }
 
@@ -91,19 +99,19 @@ public class RainEvent {
         this.confidence = confidence;
     }
 
-    public String getStatus() {
+    public RainEventStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(RainEventStatus status) {
         this.status = status;
     }
 
-    public Integer getProcessingVersion() {
+    public String getProcessingVersion() {
         return processingVersion;
     }
 
-    public void setProcessingVersion(Integer processingVersion) {
+    public void setProcessingVersion(String processingVersion) {
         this.processingVersion = processingVersion;
     }
 }

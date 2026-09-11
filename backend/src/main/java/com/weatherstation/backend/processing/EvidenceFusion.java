@@ -1,5 +1,8 @@
 package com.weatherstation.backend.processing;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class EvidenceFusion {
 
     public EventAssessment fuse(

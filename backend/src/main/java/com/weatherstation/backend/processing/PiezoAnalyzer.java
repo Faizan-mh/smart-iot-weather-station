@@ -1,7 +1,9 @@
 package com.weatherstation.backend.processing;
 
 import com.weatherstation.backend.entity.SensorReading;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PiezoAnalyzer {
 
     public boolean isZoneActive(
