@@ -16,7 +16,7 @@ public class DeviceMapper {
         return device;
     }
 
-    public DeviceResponse toDto(Device response){
+    public DeviceResponse toResponse(Device response){
         DeviceResponse deviceResponse = new DeviceResponse();
 
         deviceResponse.setDeviceId(response.getDeviceId());

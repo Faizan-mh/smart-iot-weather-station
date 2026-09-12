@@ -73,7 +73,7 @@ class SensorReadingServiceTest {
         when(configurationProvider.getConfiguration())
                 .thenReturn(configuration);
 
-        when(sensorReadingMapper.toDto(sensorReading))
+        when(sensorReadingMapper.toResponse(sensorReading))
                 .thenReturn(response);
 
         SensorReadingResponse result =
@@ -103,7 +103,7 @@ class SensorReadingServiceTest {
                 .processReading(sensorReading, configuration);
 
         verify(sensorReadingMapper)
-                .toDto(sensorReading);
+                .toResponse(sensorReading);
     }
 
 

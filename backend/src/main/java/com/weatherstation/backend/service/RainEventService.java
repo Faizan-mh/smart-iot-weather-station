@@ -24,17 +24,20 @@ public class RainEventService {
     private final CrossZoneAnalyzer crossZoneAnalyzer;
     private final EvidenceFusion evidenceFusion;
     private final IntensityClassifier intensityClassifier;
+    private final RainEventTimelineService rainEventTimelineService;
     private final EnvironmentalReadingRepository environmentalReadingRepository;
     private final Map<String, TemporalAnalyzer> temporalAnalyzers =
             new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> endingStartedAt =
+            new ConcurrentHashMap<>();
+    private final Map<String, EventAssessment> latestAssessments =
             new ConcurrentHashMap<>();
 
     public RainEventService(RainEventRepository rainEventRepository,
                             PiezoAnalyzer piezoAnalyzer,
                             CrossZoneAnalyzer crossZoneAnalyzer,
                             EvidenceFusion evidenceFusion,
-                            IntensityClassifier intensityClassifier,
+                            IntensityClassifier intensityClassifier, RainEventTimelineService rainEventTimelineService,
                             EnvironmentalReadingRepository environmentalReadingRepository
     ) {
         this.rainEventRepository = rainEventRepository;
@@ -42,6 +45,7 @@ public class RainEventService {
         this.crossZoneAnalyzer = crossZoneAnalyzer;
         this.evidenceFusion = evidenceFusion;
         this.intensityClassifier = intensityClassifier;
+        this.rainEventTimelineService = rainEventTimelineService;
         this.environmentalReadingRepository = environmentalReadingRepository;
     }
 
@@ -91,6 +95,7 @@ public class RainEventService {
         });
 
         EventAssessment finalAssessment = evidenceFusion.fuse(eventAssessment, configuration);
+        latestAssessments.put(reading.getDeviceId(), finalAssessment);
         handleEventLifecycle(reading,finalAssessment,configuration);
         return finalAssessment;
 
@@ -110,26 +115,38 @@ public class RainEventService {
     }
 
     private RainEvent createRainEvent(SensorReading reading, EventAssessment assessment, Configuration configuration) {
+        RainIntensity intensity = calculateIntensity(reading, assessment, configuration);
         RainEvent event = new RainEvent();
         event.setDeviceId(reading.getDeviceId());
         event.setStartTime(reading.getDeviceTimestamp());
         event.setStatus(RainEventStatus.ACTIVE);
-        event.setIntensity(calculateIntensity(reading, assessment, configuration));
+        event.setPeakIntensity(intensity);
         event.setProcessingVersion("v1");
-        return event;
+        RainEvent savedEvent = rainEventRepository.save(event);
+        rainEventTimelineService.updateTimeline(savedEvent.getId(),
+                reading.getDeviceTimestamp(),
+                intensity);
+        return savedEvent;
     }
     private RainEvent startNewRainEvent(SensorReading reading, EventAssessment assessment,Configuration configuration) {
-        return rainEventRepository.save(
-                createRainEvent(
+        return createRainEvent(
                         reading,
                         assessment,
                         configuration
 
-                ));
+                );
     }
     private RainEvent updateActiveEvent(RainEvent event, EventAssessment assessment, SensorReading reading,Configuration configuration) {
         endingStartedAt.remove(reading.getDeviceId());
-        event.setIntensity(calculateIntensity(reading, assessment, configuration));
+        RainIntensity newIntensity = calculateIntensity(reading, assessment, configuration);
+        if(event.getPeakIntensity() == null || newIntensity.getSeverity() > event.getPeakIntensity().getSeverity()) {
+            event.setPeakIntensity(newIntensity);
+        }
+        rainEventTimelineService.updateTimeline(
+                event.getId(),
+                reading.getDeviceTimestamp(),
+                newIntensity
+        );
         event.setStatus(RainEventStatus.ACTIVE);
         event.setEndTime(null);
         return rainEventRepository.save(event);
@@ -150,7 +167,11 @@ public class RainEventService {
                         configuration);
             case RAIN_CANDIDATE:
                     if (currentEvent.isPresent()) {
-                        return updateActiveEvent(currentEvent.get(), assessment, reading, configuration);
+                        endingStartedAt.remove(reading.getDeviceId());
+                        RainEvent event = currentEvent.get();
+                        event.setStatus(RainEventStatus.ACTIVE);
+                        event.setEndTime(null);
+                        return rainEventRepository.save(event);
                     }
                     return null;
             case NO_ACTIVITY:
@@ -185,10 +206,14 @@ public class RainEventService {
             event.setEndTime(currentTime);
             long eventDurationSeconds = Duration.between(event.getStartTime(), currentTime).getSeconds();
             event.setDurationSeconds(eventDurationSeconds);
+            rainEventTimelineService.closeCurrentTimeline(event.getId(),currentTime);
             endingStartedAt.remove(deviceId);
             return rainEventRepository.save(event);
         }
         return event;
+    }
+    public EventAssessment getLatestEventAssessment(String deviceId) {
+        return latestAssessments.get(deviceId);
     }
 }
 

@@ -29,7 +29,7 @@ public class DeviceService {
         }
         device.setCreatedAt(LocalDateTime.now());
         device.setActive(true);
-        DeviceResponse DeviceResp = deviceMapper.toDto(deviceRepository.save(device));
+        DeviceResponse DeviceResp = deviceMapper.toResponse(deviceRepository.save(device));
         return DeviceResp;
 
     }

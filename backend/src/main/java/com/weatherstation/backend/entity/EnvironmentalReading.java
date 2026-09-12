@@ -25,11 +25,11 @@ public class EnvironmentalReading {
     private Double humidityPercent;
 
     @Column(name = "pressure_hpa")
-    private double pressureHpa;
+    private Double pressureHpa;
     @Column(name = "wind_speed_kmh")
-    private double windSpeedKmh;
+    private Double windSpeedKmh;
     @Column(name = "wind_gust_kmh")
-    private double windGustKmh;
+    private Double windGustKmh;
 
     public EnvironmentalReading() {
     }
@@ -71,27 +71,27 @@ public class EnvironmentalReading {
         this.humidityPercent = humidityPercent;
     }
 
-    public double getPressureHpa() {
+    public Double getPressureHpa() {
         return pressureHpa;
     }
 
-    public void setPressureHpa(double pressureHpa) {
+    public void setPressureHpa(Double pressureHpa) {
         this.pressureHpa = pressureHpa;
     }
 
-    public double getWindSpeedKmh() {
+    public Double getWindSpeedKmh() {
         return windSpeedKmh;
     }
 
-    public void setWindSpeedKmh(double windSpeedKmh) {
+    public void setWindSpeedKmh(Double windSpeedKmh) {
         this.windSpeedKmh = windSpeedKmh;
     }
 
-    public double getWindGustKmh() {
+    public Double getWindGustKmh() {
         return windGustKmh;
     }
 
-    public void setWindGustKmh(double windGustKmh) {
+    public void setWindGustKmh(Double windGustKmh) {
         this.windGustKmh = windGustKmh;
     }
 }

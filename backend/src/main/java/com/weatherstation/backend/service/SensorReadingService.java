@@ -60,6 +60,6 @@ public class SensorReadingService {
                 configuration
         );
 
-        return sensorReadingMapper.toDto(savedReading);
+        return sensorReadingMapper.toResponse(savedReading);
     }
 }

@@ -1,29 +1,24 @@
 package com.weatherstation.backend.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
-public class EnvironmentalReadingRequest {
+public class EnvironmentalReadingResponse {
 
-    @NotBlank(message = "Enter a valid deviceId")
-    private String deviceId;
-    @NotNull(message = "Enter a valid timestamp")
-    private LocalDateTime deviceTimestamp;
+        private Long id;
+        private String deviceId;
+        private LocalDateTime deviceTimestamp;
+        private Double temperatureC;
+        private Double humidityPercent;
+        private Double pressureHpa;
+        private Double windSpeedKmh;
+        private Double windGustKmh;
 
-    @NotNull(message = "Enter a valid temperature")
-    private Double temperatureC;
-    @NotNull(message = "Enter a valid HumidityPercent")
-    private Double humidityPercent;
-    @NotNull
-    private Double pressureHpa;
-    @NotNull
-    private Double windSpeedKmh;
-    @NotNull
-    private Double windGustKmh;
+    public Long getId() {
+        return id;
+    }
 
-    public EnvironmentalReadingRequest() {
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDeviceId() {

@@ -43,6 +43,8 @@ public class RainEventServiceTest {
 
         @InjectMocks
         private RainEventService rainEventService;
+        @Mock
+        private RainEventTimelineService rainEventTimelineService;
 
 private Configuration configuration() {
     Configuration configuration = new Configuration();
@@ -127,7 +129,11 @@ void confirmedRainShouldStartNewEvent() {
             .thenReturn(RainIntensity.MODERATE);
 
     when(rainEventRepository.save(any(RainEvent.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation ->{
+                RainEvent event = invocation.getArgument(0);
+                event.setId(1L);
+                return event;
+            });
 
     EventAssessment result =
             rainEventService.processReading(
@@ -144,7 +150,7 @@ void confirmedRainShouldStartNewEvent() {
             argThat(event ->
                     event.getDeviceId().equals("device-1")
                             && event.getStatus() == RainEventStatus.ACTIVE
-                            && event.getIntensity() == RainIntensity.MODERATE
+                            && event.getPeakIntensity() == RainIntensity.MODERATE
                             && event.getStartTime().equals(
                             reading.getDeviceTimestamp())
             )
@@ -215,7 +221,7 @@ void confirmedRainShouldStartNewEvent() {
 
         assertEquals(10L, existingEvent.getId());
         assertEquals(RainEventStatus.ACTIVE, existingEvent.getStatus());
-        assertEquals(RainIntensity.HEAVY, existingEvent.getIntensity());
+        assertEquals(RainIntensity.HEAVY, existingEvent.getPeakIntensity());
 
         verify(rainEventRepository).save(existingEvent);
     }
@@ -374,14 +380,6 @@ void confirmedRainShouldStartNewEvent() {
                         anyString(), anyList()))
                 .thenReturn(Optional.of(event));
 
-        when(intensityClassifier.calculateIntensityScore(
-                any(), eq(0.5), any()))
-                .thenReturn(0.5);
-
-        when(intensityClassifier.classify(
-                eq(0.5), any()))
-                .thenReturn(RainIntensity.MODERATE);
-
         when(rainEventRepository.save(any(RainEvent.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -410,9 +408,8 @@ void confirmedRainShouldStartNewEvent() {
 
         assertNull(event.getEndTime());
 
-        assertEquals(
-                RainIntensity.MODERATE,
-                event.getIntensity()
+        assertNull(
+                event.getPeakIntensity()
         );
 
         verify(rainEventRepository).save(event);

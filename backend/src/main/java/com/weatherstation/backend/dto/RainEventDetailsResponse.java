@@ -1,54 +1,30 @@
-package com.weatherstation.backend.entity;
+package com.weatherstation.backend.dto;
 
 import com.weatherstation.backend.enums.RainEventStatus;
 import com.weatherstation.backend.enums.RainIntensity;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "rain_event")
-public class RainEvent {
+public class RainEventDetailsResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "device_id", nullable = false)
     private String deviceId;
-
-    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
-
-    @Column(name = "end_time")
     private LocalDateTime endTime;
-
-    @Column(name = "duration_seconds")
     private Long durationSeconds;
-
-    @Column(name = "peak_intensity")
-    @Enumerated(EnumType.STRING)
     private RainIntensity peakIntensity;
-
-    @Column(name = "confidence")
-    private Double confidence;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
     private RainEventStatus status;
-
-    @Column(name = "processing_version")
     private String processingVersion;
 
-    public RainEvent() {
+    private List<RainEventTimelineResponse> timeline;
+
+    public Long getId() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getDeviceId() {
@@ -91,14 +67,6 @@ public class RainEvent {
         this.peakIntensity = peakIntensity;
     }
 
-    public Double getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(Double confidence) {
-        this.confidence = confidence;
-    }
-
     public RainEventStatus getStatus() {
         return status;
     }
@@ -113,5 +81,13 @@ public class RainEvent {
 
     public void setProcessingVersion(String processingVersion) {
         this.processingVersion = processingVersion;
+    }
+
+    public List<RainEventTimelineResponse> getTimeline() {
+        return timeline;
+    }
+
+    public void setTimeline(List<RainEventTimelineResponse> timeline) {
+        this.timeline = timeline;
     }
 }

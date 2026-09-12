@@ -5,6 +5,7 @@ import com.weatherstation.backend.enums.RainEventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface RainEventRepository extends JpaRepository<RainEvent,Long> {
@@ -12,4 +13,5 @@ public interface RainEventRepository extends JpaRepository<RainEvent,Long> {
             String deviceId,
             Collection<RainEventStatus> statuses
     );
+    List<RainEvent> findByDeviceIdOrderByStartTimeDesc(String deviceId);
 }

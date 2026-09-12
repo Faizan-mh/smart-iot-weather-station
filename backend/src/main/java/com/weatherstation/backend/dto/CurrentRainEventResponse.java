@@ -1,54 +1,28 @@
-package com.weatherstation.backend.entity;
+package com.weatherstation.backend.dto;
 
 import com.weatherstation.backend.enums.RainEventStatus;
 import com.weatherstation.backend.enums.RainIntensity;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "rain_event")
-public class RainEvent {
+public class CurrentRainEventResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "device_id", nullable = false)
     private String deviceId;
-
-    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
-
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
-
-    @Column(name = "duration_seconds")
-    private Long durationSeconds;
-
-    @Column(name = "peak_intensity")
-    @Enumerated(EnumType.STRING)
     private RainIntensity peakIntensity;
-
-    @Column(name = "confidence")
-    private Double confidence;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
     private RainEventStatus status;
-
-    @Column(name = "processing_version")
     private String processingVersion;
 
-    public RainEvent() {
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public CurrentRainEventResponse() {
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDeviceId() {
@@ -67,36 +41,12 @@ public class RainEvent {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Long getDurationSeconds() {
-        return durationSeconds;
-    }
-
-    public void setDurationSeconds(Long durationSeconds) {
-        this.durationSeconds = durationSeconds;
-    }
-
     public RainIntensity getPeakIntensity() {
         return peakIntensity;
     }
 
     public void setPeakIntensity(RainIntensity peakIntensity) {
         this.peakIntensity = peakIntensity;
-    }
-
-    public Double getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(Double confidence) {
-        this.confidence = confidence;
     }
 
     public RainEventStatus getStatus() {

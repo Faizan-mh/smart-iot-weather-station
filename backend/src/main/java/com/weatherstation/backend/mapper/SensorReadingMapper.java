@@ -1,10 +1,7 @@
 package com.weatherstation.backend.mapper;
 
-import com.weatherstation.backend.dto.DeviceRequest;
-import com.weatherstation.backend.dto.DeviceResponse;
 import com.weatherstation.backend.dto.SensorReadingRequest;
 import com.weatherstation.backend.dto.SensorReadingResponse;
-import com.weatherstation.backend.entity.Device;
 import com.weatherstation.backend.entity.SensorReading;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ public class SensorReadingMapper {
         return sensorReading;
     }
 
-    public SensorReadingResponse toDto(SensorReading response){
+    public SensorReadingResponse toResponse(SensorReading response){
         SensorReadingResponse sensorReadingResponse = new SensorReadingResponse();
 
         sensorReadingResponse.setId(response.getId());
