@@ -1,6 +1,7 @@
 package com.weatherstation.backend.service;
 
 import com.weatherstation.backend.dto.LiveWeatherUpdate;
+import com.weatherstation.backend.entity.Device;
 import com.weatherstation.backend.entity.EnvironmentalReading;
 import com.weatherstation.backend.entity.RainEvent;
 import com.weatherstation.backend.entity.SensorReading;
@@ -9,8 +10,10 @@ import com.weatherstation.backend.enums.RainIntensity;
 import com.weatherstation.backend.mapper.EnvironmentalReadingMapper;
 import com.weatherstation.backend.mapper.RainEventMapper;
 import com.weatherstation.backend.processing.*;
+import com.weatherstation.backend.repository.DeviceRepository;
 import com.weatherstation.backend.repository.EnvironmentalReadingRepository;
 import com.weatherstation.backend.repository.RainEventRepository;
+import com.weatherstation.backend.telegram.TelegramNotificationService;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -30,6 +33,8 @@ public class RainEventService {
     private final RainEventTimelineService rainEventTimelineService;
     private final EnvironmentalReadingRepository environmentalReadingRepository;
     private final LiveWeatherUpdateService liveWeatherUpdateService;
+    private final TelegramNotificationService telegramNotificationService;
+    private final DeviceRepository deviceRepository;
     private final RainEventMapper rainEventMapper;
     private final EnvironmentalReadingMapper  environmentalReadingMapper;
     private final Map<String, TemporalAnalyzer> temporalAnalyzers =
@@ -46,7 +51,7 @@ public class RainEventService {
             EvidenceFusion evidenceFusion,
             IntensityClassifier intensityClassifier, RainEventTimelineService rainEventTimelineService,
             EnvironmentalReadingRepository environmentalReadingRepository,
-            LiveWeatherUpdateService liveWeatherUpdateService, RainEventMapper rainEventMapper, EnvironmentalReadingMapper environmentalReadingMapper
+            LiveWeatherUpdateService liveWeatherUpdateService, TelegramNotificationService telegramNotificationService, DeviceRepository deviceRepository, RainEventMapper rainEventMapper, EnvironmentalReadingMapper environmentalReadingMapper
     ) {
         this.rainEventRepository = rainEventRepository;
         this.piezoAnalyzer = piezoAnalyzer;
@@ -56,6 +61,8 @@ public class RainEventService {
         this.rainEventTimelineService = rainEventTimelineService;
         this.environmentalReadingRepository = environmentalReadingRepository;
         this.liveWeatherUpdateService = liveWeatherUpdateService;
+        this.telegramNotificationService = telegramNotificationService;
+        this.deviceRepository = deviceRepository;
         this.rainEventMapper = rainEventMapper;
         this.environmentalReadingMapper = environmentalReadingMapper;
     }
@@ -141,9 +148,21 @@ public class RainEventService {
         event.setPeakIntensity(intensity);
         event.setProcessingVersion("v1");
         RainEvent savedEvent = rainEventRepository.save(event);
-        rainEventTimelineService.updateTimeline(savedEvent.getId(),
+
+        rainEventTimelineService.updateTimeline(
+                savedEvent.getId(),
                 reading.getDeviceTimestamp(),
                 intensity);
+
+        Device device = deviceRepository.findByDeviceId(reading.getDeviceId());
+
+        if (device != null) {
+            telegramNotificationService.notifyRainStarted(
+                    savedEvent,
+                    assessment,
+                    device);
+        }
+
         return savedEvent;
     }
     private RainEvent startNewRainEvent(SensorReading reading, EventAssessment assessment,Configuration configuration) {
@@ -226,12 +245,31 @@ public class RainEventService {
             event.setDurationSeconds(eventDurationSeconds);
             rainEventTimelineService.closeCurrentTimeline(event.getId(),currentTime);
             endingStartedAt.remove(deviceId);
-            return rainEventRepository.save(event);
+            RainEvent completedEvent = rainEventRepository.save(event);
+
+            Device device = deviceRepository.findByDeviceId(deviceId);
+
+            if (device != null) {
+                telegramNotificationService.notifyRainEnded(
+                        completedEvent,
+                        device);
+            }
+
+            return completedEvent;
         }
         return event;
     }
     public EventAssessment getLatestEventAssessment(String deviceId) {
         return latestAssessments.get(deviceId);
+    }
+    public Optional<RainEvent> getCurrentRainEvent(String deviceId) {
+        return findCurrentEvent(deviceId);
+    }
+    public Optional<EnvironmentalReading> getLatestEnvironmentalReading(
+            String deviceId) {
+
+        return environmentalReadingRepository
+                .findTopByDeviceIdOrderByDeviceTimestampDesc(deviceId);
     }
 }
 
