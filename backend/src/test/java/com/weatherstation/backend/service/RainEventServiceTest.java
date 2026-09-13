@@ -1,14 +1,20 @@
 package com.weatherstation.backend.service;
 
+import com.weatherstation.backend.dto.CurrentRainEventResponse;
+import com.weatherstation.backend.dto.EventAssessmentResponse;
+import com.weatherstation.backend.dto.LiveWeatherUpdate;
 import com.weatherstation.backend.entity.RainEvent;
 import com.weatherstation.backend.entity.SensorReading;
 import com.weatherstation.backend.enums.RainEventStatus;
 import com.weatherstation.backend.enums.RainIntensity;
+import com.weatherstation.backend.mapper.EnvironmentalReadingMapper;
+import com.weatherstation.backend.mapper.RainEventMapper;
 import com.weatherstation.backend.processing.*;
 import com.weatherstation.backend.repository.EnvironmentalReadingRepository;
 import com.weatherstation.backend.repository.RainEventRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,144 +29,258 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class RainEventServiceTest {
 
-        @Mock
-        private RainEventRepository rainEventRepository;
+    @Mock
+    private RainEventRepository rainEventRepository;
 
-        @Mock
-        private PiezoAnalyzer piezoAnalyzer;
+    @Mock
+    private PiezoAnalyzer piezoAnalyzer;
 
-        @Mock
-        private CrossZoneAnalyzer crossZoneAnalyzer;
+    @Mock
+    private CrossZoneAnalyzer crossZoneAnalyzer;
 
-        @Mock
-        private EvidenceFusion evidenceFusion;
+    @Mock
+    private EvidenceFusion evidenceFusion;
 
-        @Mock
-        private IntensityClassifier intensityClassifier;
+    @Mock
+    private IntensityClassifier intensityClassifier;
 
-        @Mock
-        private EnvironmentalReadingRepository environmentalReadingRepository;
+    @Mock
+    private EnvironmentalReadingRepository environmentalReadingRepository;
 
-        @InjectMocks
-        private RainEventService rainEventService;
-        @Mock
-        private RainEventTimelineService rainEventTimelineService;
+    @Mock
+    private RainEventTimelineService rainEventTimelineService;
 
-private Configuration configuration() {
-    Configuration configuration = new Configuration();
+    @Mock
+    private LiveWeatherUpdateService liveWeatherUpdateService;
+    @Mock
+    private RainEventMapper rainEventMapper;
+    @Mock
+    private EnvironmentalReadingMapper environmentalReadingMapper;
 
-    configuration.setP1PeakThreshold(100);
-    configuration.setP2PeakThreshold(100);
-    configuration.setP3PeakThreshold(100);
-    configuration.setP4PeakThreshold(100);
+    @InjectMocks
+    private RainEventService rainEventService;
 
-    configuration.setP1RmsThreshold(30);
-    configuration.setP2RmsThreshold(30);
-    configuration.setP3RmsThreshold(30);
-    configuration.setP4RmsThreshold(30);
+    private Configuration configuration() {
+        Configuration configuration = new Configuration();
 
-    configuration.setP1ImpactThreshold(3);
-    configuration.setP2ImpactThreshold(3);
-    configuration.setP3ImpactThreshold(3);
-    configuration.setP4ImpactThreshold(3);
+        configuration.setP1PeakThreshold(100);
+        configuration.setP2PeakThreshold(100);
+        configuration.setP3PeakThreshold(100);
+        configuration.setP4PeakThreshold(100);
 
-    configuration.setMinimumActiveZones(2);
-    configuration.setRequiredConsecutiveWindows(3);
+        configuration.setP1RmsThreshold(30);
+        configuration.setP2RmsThreshold(30);
+        configuration.setP3RmsThreshold(30);
+        configuration.setP4RmsThreshold(30);
 
-    configuration.setRainSensorWetThreshold(500);
-    configuration.setHighWindThresholdKmh(20);
+        configuration.setP1ImpactThreshold(3);
+        configuration.setP2ImpactThreshold(3);
+        configuration.setP3ImpactThreshold(3);
+        configuration.setP4ImpactThreshold(3);
 
-    configuration.setEndConfirmationSeconds(30);
+        configuration.setMinimumActiveZones(2);
+        configuration.setRequiredConsecutiveWindows(3);
 
-    configuration.setImpactFrequencyReference(10);
-    configuration.setRmsReference(50);
-    configuration.setModerateIntensityThreshold(0.40);
-    configuration.setHeavyIntensityThreshold(0.70);
+        configuration.setRainSensorWetThreshold(500);
+        configuration.setHighWindThresholdKmh(20);
 
-    return configuration;
-}
+        configuration.setEndConfirmationSeconds(30);
 
-@Test
-void confirmedRainShouldStartNewEvent() {
+        configuration.setImpactFrequencyReference(10);
+        configuration.setRmsReference(50);
+        configuration.setModerateIntensityThreshold(0.40);
+        configuration.setHeavyIntensityThreshold(0.70);
 
-    SensorReading reading = new SensorReading();
-    reading.setDeviceId("device-1");
-    reading.setDeviceTimestamp(
-            LocalDateTime.of(2026, 9, 11, 20, 0)
-    );
+        return configuration;
+    }
 
-    EventAssessment assessment = new EventAssessment();
+    @Test
+    void confirmedRainShouldStartNewEvent() {
 
-    assessment.setEventClassification(
-            EventClassification.RAIN_CONFIRMED
-    );
-    assessment.setActiveZoneCount(4);
-    assessment.setSpatialCoverage(1.0);
-    assessment.setPersistentPiezoActivity(true);
+        Configuration configuration = configuration();
 
-    when(piezoAnalyzer.analyzeZones(
-            eq(reading), any(Configuration.class)))
-            .thenReturn(new boolean[]{true, true, true, true});
+        SensorReading reading = new SensorReading();
+        reading.setDeviceId("WS-001");
+        reading.setDeviceTimestamp(LocalDateTime.now());
 
-    when(crossZoneAnalyzer.countActiveZones(any()))
-            .thenReturn(4);
+        reading.setRainSensor(200.0);
 
-    when(crossZoneAnalyzer.calculateSpatialCoverage(any()))
-            .thenReturn(1.0);
+        reading.setP1Peak(150.0);
+        reading.setP2Peak(160.0);
+        reading.setP3Peak(140.0);
+        reading.setP4Peak(155.0);
 
-    when(environmentalReadingRepository
-            .findTopByDeviceIdOrderByDeviceTimestampDesc("device-1"))
-            .thenReturn(Optional.empty());
+        reading.setP1Rms(40.0);
+        reading.setP2Rms(42.0);
+        reading.setP3Rms(38.0);
+        reading.setP4Rms(41.0);
 
-    when(evidenceFusion.fuse(any(), any()))
-            .thenReturn(assessment);
+        reading.setP1ImpactCount(5);
+        reading.setP2ImpactCount(6);
+        reading.setP3ImpactCount(4);
+        reading.setP4ImpactCount(5);
 
-    when(rainEventRepository
-            .findTopByDeviceIdAndStatusInOrderByStartTimeDesc(
-                    eq("device-1"), anyList()))
-            .thenReturn(Optional.empty());
+        reading.setSamplingRateHz(100.0);
+        reading.setWindowDurationMs(1000.0);
 
-    when(intensityClassifier.calculateIntensityScore(
-            eq(reading), eq(1.0), any(Configuration.class)))
-            .thenReturn(0.6);
+        EventAssessment assessment = new EventAssessment();
+        assessment.setEventClassification(
+                EventClassification.RAIN_CONFIRMED
+        );
+        assessment.setActiveZoneCount(4);
+        assessment.setSpatialCoverage(1.0);
+        assessment.setPersistentPiezoActivity(true);
+        assessment.setRainSensorWet(true);
+        assessment.setReasoning("Strong rain evidence");
 
-    when(intensityClassifier.classify(
-            eq(0.6), any(Configuration.class)))
-            .thenReturn(RainIntensity.MODERATE);
+        when(piezoAnalyzer.analyzeZones(
+                reading,
+                configuration
+        )).thenReturn(
+                new boolean[]{true, true, true, true}
+        );
 
-    when(rainEventRepository.save(any(RainEvent.class)))
-            .thenAnswer(invocation ->{
-                RainEvent event = invocation.getArgument(0);
-                event.setId(1L);
-                return event;
-            });
+        // Cross-zone analysis
+        when(crossZoneAnalyzer.countActiveZones(
+                any(boolean[].class)
+        )).thenReturn(4);
 
-    EventAssessment result =
-            rainEventService.processReading(
-                    reading,
-                    configuration()
-            );
+        when(crossZoneAnalyzer.calculateSpatialCoverage(
+                any(boolean[].class)
+        )).thenReturn(1.0);
 
-    assertEquals(
-            EventClassification.RAIN_CONFIRMED,
-            result.getEventClassification()
-    );
+        // No environmental reading available
+        when(environmentalReadingRepository
+                .findTopByDeviceIdOrderByDeviceTimestampDesc("WS-001"))
+                .thenReturn(Optional.empty());
 
-    verify(rainEventRepository).save(
-            argThat(event ->
-                    event.getDeviceId().equals("device-1")
-                            && event.getStatus() == RainEventStatus.ACTIVE
-                            && event.getPeakIntensity() == RainIntensity.MODERATE
-                            && event.getStartTime().equals(
-                            reading.getDeviceTimestamp())
-            )
-    );
-}
+        // Evidence fusion
+        when(evidenceFusion.fuse(
+                any(EventAssessment.class),
+                eq(configuration)
+        )).thenReturn(assessment);
+
+        when(rainEventRepository
+                .findTopByDeviceIdAndStatusInOrderByStartTimeDesc(
+                        eq("WS-001"),
+                        anyList()
+                ))
+                .thenReturn(Optional.empty());
+
+        // Intensity calculation
+        when(intensityClassifier.calculateIntensityScore(
+                reading,
+                1.0,
+                configuration
+        )).thenReturn(0.6);
+
+        // Intensity classification
+        when(intensityClassifier.classify(
+                0.6,
+                configuration
+        )).thenReturn(RainIntensity.MODERATE);
+
+        // Simulate database save
+        RainEvent savedEvent = new RainEvent();
+        savedEvent.setId(1L);
+        savedEvent.setDeviceId("WS-001");
+        savedEvent.setStatus(RainEventStatus.ACTIVE);
+        savedEvent.setPeakIntensity(RainIntensity.MODERATE);
+        savedEvent.setStartTime(reading.getDeviceTimestamp());
+
+        when(rainEventRepository.save(
+                any(RainEvent.class)
+        )).thenReturn(savedEvent);
+
+        // WebSocket mapper responses
+        EventAssessmentResponse assessmentResponse =
+                new EventAssessmentResponse();
+
+        CurrentRainEventResponse eventResponse =
+                new CurrentRainEventResponse();
+
+        when(rainEventMapper.toResponse(
+                assessment
+        )).thenReturn(assessmentResponse);
+
+        when(rainEventMapper.toResponse(
+                any(RainEvent.class)
+        )).thenReturn(eventResponse);
+
+        EventAssessment result =
+                rainEventService.processReading(
+                        reading,
+                        configuration
+                );
+
+        assertEquals(
+                EventClassification.RAIN_CONFIRMED,
+                result.getEventClassification()
+        );
+
+        ArgumentCaptor<RainEvent> eventCaptor =
+                ArgumentCaptor.forClass(RainEvent.class);
+
+        verify(rainEventRepository)
+                .save(eventCaptor.capture());
+
+        RainEvent capturedEvent =
+                eventCaptor.getValue();
+
+        assertEquals(
+                "WS-001",
+                capturedEvent.getDeviceId()
+        );
+
+        assertEquals(
+                RainEventStatus.ACTIVE,
+                capturedEvent.getStatus()
+        );
+
+        assertEquals(
+                RainIntensity.MODERATE,
+                capturedEvent.getPeakIntensity()
+        );
+
+        assertEquals(
+                reading.getDeviceTimestamp(),
+                capturedEvent.getStartTime()
+        );
+
+        ArgumentCaptor<LiveWeatherUpdate> updateCaptor =
+                ArgumentCaptor.forClass(
+                        LiveWeatherUpdate.class
+                );
+
+        verify(liveWeatherUpdateService)
+                .publish(
+                        eq("WS-001"),
+                        updateCaptor.capture()
+                );
+
+        LiveWeatherUpdate publishedUpdate =
+                updateCaptor.getValue();
+
+        assertSame(
+                assessmentResponse,
+                publishedUpdate.getAssessment()
+        );
+
+        assertSame(
+                eventResponse,
+                publishedUpdate.getCurrentEvent()
+        );
+
+        assertNull(
+                publishedUpdate.getEnvironment()
+        );
+    }
+
     @Test
     void confirmedRainShouldUpdateExistingEvent() {
 
         SensorReading reading = new SensorReading();
-        reading.setDeviceId("device-1");
+        reading.setDeviceId("WS-001");
         reading.setDeviceTimestamp(
                 LocalDateTime.of(2026, 9, 11, 20, 5)
         );
@@ -176,7 +296,7 @@ void confirmedRainShouldStartNewEvent() {
 
         RainEvent existingEvent = new RainEvent();
         existingEvent.setId(10L);
-        existingEvent.setDeviceId("device-1");
+        existingEvent.setDeviceId("WS-001");
         existingEvent.setStartTime(
                 LocalDateTime.of(2026, 9, 11, 20, 0)
         );
@@ -200,7 +320,7 @@ void confirmedRainShouldStartNewEvent() {
 
         when(rainEventRepository
                 .findTopByDeviceIdAndStatusInOrderByStartTimeDesc(
-                        eq("device-1"), anyList()))
+                        eq("WS-001"), anyList()))
                 .thenReturn(Optional.of(existingEvent));
 
         when(intensityClassifier.calculateIntensityScore(
@@ -225,11 +345,12 @@ void confirmedRainShouldStartNewEvent() {
 
         verify(rainEventRepository).save(existingEvent);
     }
+
     @Test
     void candidateWithoutExistingEventShouldNotCreateEvent() {
 
         SensorReading reading = new SensorReading();
-        reading.setDeviceId("device-1");
+        reading.setDeviceId("WS-001");
         reading.setDeviceTimestamp(LocalDateTime.now());
 
         EventAssessment assessment = new EventAssessment();
@@ -268,11 +389,12 @@ void confirmedRainShouldStartNewEvent() {
         verify(rainEventRepository, never())
                 .save(any(RainEvent.class));
     }
+
     @Test
     void noActivityShouldMoveActiveEventToEnding() {
 
         SensorReading reading = new SensorReading();
-        reading.setDeviceId("device-1");
+        reading.setDeviceId("WS-001");
         reading.setDeviceTimestamp(
                 LocalDateTime.of(2026, 9, 11, 20, 10)
         );
@@ -286,7 +408,7 @@ void confirmedRainShouldStartNewEvent() {
 
         RainEvent event = new RainEvent();
         event.setId(10L);
-        event.setDeviceId("device-1");
+        event.setDeviceId("WS-001");
         event.setStartTime(
                 LocalDateTime.of(2026, 9, 11, 20, 0)
         );
@@ -335,7 +457,7 @@ void confirmedRainShouldStartNewEvent() {
         Configuration configuration = configuration();
 
         SensorReading reading = new SensorReading();
-        reading.setDeviceId("device-1");
+        reading.setDeviceId("WS-001");
         reading.setDeviceTimestamp(
                 LocalDateTime.of(2026, 9, 11, 20, 20)
         );
@@ -352,7 +474,7 @@ void confirmedRainShouldStartNewEvent() {
         RainEvent event = new RainEvent();
 
         event.setId(10L);
-        event.setDeviceId("device-1");
+        event.setDeviceId("WS-001");
         event.setStartTime(
                 LocalDateTime.of(2026, 9, 11, 20, 0)
         );

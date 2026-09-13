@@ -1,6 +1,7 @@
 package com.weatherstation.backend.mapper;
 
 import com.weatherstation.backend.dto.*;
+import com.weatherstation.backend.entity.EnvironmentalReading;
 import com.weatherstation.backend.entity.RainEvent;
 import com.weatherstation.backend.entity.RainEventTimeline;
 import com.weatherstation.backend.processing.EventAssessment;

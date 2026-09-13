@@ -1,10 +1,13 @@
 package com.weatherstation.backend.service;
 
+import com.weatherstation.backend.dto.LiveWeatherUpdate;
 import com.weatherstation.backend.entity.EnvironmentalReading;
 import com.weatherstation.backend.entity.RainEvent;
 import com.weatherstation.backend.entity.SensorReading;
 import com.weatherstation.backend.enums.RainEventStatus;
 import com.weatherstation.backend.enums.RainIntensity;
+import com.weatherstation.backend.mapper.EnvironmentalReadingMapper;
+import com.weatherstation.backend.mapper.RainEventMapper;
 import com.weatherstation.backend.processing.*;
 import com.weatherstation.backend.repository.EnvironmentalReadingRepository;
 import com.weatherstation.backend.repository.RainEventRepository;
@@ -26,6 +29,9 @@ public class RainEventService {
     private final IntensityClassifier intensityClassifier;
     private final RainEventTimelineService rainEventTimelineService;
     private final EnvironmentalReadingRepository environmentalReadingRepository;
+    private final LiveWeatherUpdateService liveWeatherUpdateService;
+    private final RainEventMapper rainEventMapper;
+    private final EnvironmentalReadingMapper  environmentalReadingMapper;
     private final Map<String, TemporalAnalyzer> temporalAnalyzers =
             new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> endingStartedAt =
@@ -33,12 +39,14 @@ public class RainEventService {
     private final Map<String, EventAssessment> latestAssessments =
             new ConcurrentHashMap<>();
 
-    public RainEventService(RainEventRepository rainEventRepository,
-                            PiezoAnalyzer piezoAnalyzer,
-                            CrossZoneAnalyzer crossZoneAnalyzer,
-                            EvidenceFusion evidenceFusion,
-                            IntensityClassifier intensityClassifier, RainEventTimelineService rainEventTimelineService,
-                            EnvironmentalReadingRepository environmentalReadingRepository
+    public RainEventService(
+            RainEventRepository rainEventRepository,
+            PiezoAnalyzer piezoAnalyzer,
+            CrossZoneAnalyzer crossZoneAnalyzer,
+            EvidenceFusion evidenceFusion,
+            IntensityClassifier intensityClassifier, RainEventTimelineService rainEventTimelineService,
+            EnvironmentalReadingRepository environmentalReadingRepository,
+            LiveWeatherUpdateService liveWeatherUpdateService, RainEventMapper rainEventMapper, EnvironmentalReadingMapper environmentalReadingMapper
     ) {
         this.rainEventRepository = rainEventRepository;
         this.piezoAnalyzer = piezoAnalyzer;
@@ -47,6 +55,9 @@ public class RainEventService {
         this.intensityClassifier = intensityClassifier;
         this.rainEventTimelineService = rainEventTimelineService;
         this.environmentalReadingRepository = environmentalReadingRepository;
+        this.liveWeatherUpdateService = liveWeatherUpdateService;
+        this.rainEventMapper = rainEventMapper;
+        this.environmentalReadingMapper = environmentalReadingMapper;
     }
 
     public EventAssessment processReading(SensorReading reading, Configuration configuration) {
@@ -96,7 +107,14 @@ public class RainEventService {
 
         EventAssessment finalAssessment = evidenceFusion.fuse(eventAssessment, configuration);
         latestAssessments.put(reading.getDeviceId(), finalAssessment);
-        handleEventLifecycle(reading,finalAssessment,configuration);
+        RainEvent currentEvent = handleEventLifecycle(reading,finalAssessment,configuration);
+        LiveWeatherUpdate update = new LiveWeatherUpdate();
+        update.setAssessment(rainEventMapper.toResponse(finalAssessment));
+        if(currentEvent != null) {
+            update.setCurrentEvent(rainEventMapper.toResponse(currentEvent));
+        }
+        latestEnvironmentalReading.ifPresent(environment -> update.setEnvironment(environmentalReadingMapper.toResponse(environment)));
+        liveWeatherUpdateService.publish(reading.getDeviceId(), update);
         return finalAssessment;
 
     }
